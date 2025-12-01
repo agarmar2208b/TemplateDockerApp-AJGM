@@ -90,4 +90,5 @@ LogLevel warn
 <IfModule mime_magic_module>
     MIMEMagicFile /etc/apache2/magic
 </IfModule>
+
 IncludeOptional /etc/apache2/conf.d/*.conf

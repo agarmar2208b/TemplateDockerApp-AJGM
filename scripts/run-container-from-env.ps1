@@ -28,24 +28,8 @@ foreach ($line in $lines) {
     $envVars[$k] = $v
 }
 
-if (-not $envVars.ContainsKey('SERVER_NAME')) {
-    Write-Error "SERVER_NAME no encontrado en $EnvFile"
-    exit 1
-}
-else {
-    Write-Host "SERVER_NAME found in ${EnvFile}: $($envVars['SERVER_NAME'])"
-}
 
-$serverName = $envVars['SERVER_NAME']
 
-if ($envVars.ContainsKey('SERVER_PORT')) { 
-    $serverPort = $envVars['SERVER_PORT'] 
-    Write-Host "SERVER_PORT found in ${EnvFile}: $serverPort"
-} 
-else { 
-    $serverPort = 80
-    Write-Host "SERVER_PORT not found in ${EnvFile}, defaulting to: $serverPort"
-}
 
 if (-not (Test-Path $HostSrc)) {
     Write-Host "Host source '$HostSrc' no existe — creando..."
@@ -75,6 +59,10 @@ if ($existing) {
 $argsSTR = @('run', '-d', '--name', $ContainerName, '-v', "${hostPath}:/var/www/$serverName")
 $argsSTR += @('-p', $(@($serverPort, 80) -join ':'))
 $argsSTR += $Image
+
+foreach ($entry in $envVars.GetEnumerator()) {
+    $argsSTR += @('-e', "$($entry.Key)=$($entry.Value)")
+}
 
 Write-Host "Ejecutando: docker $($argsSTR -join ' ')"
 & docker @argsSTR
